@@ -223,27 +223,42 @@
     </div>
   </div>
 
-  <!-- JavaScript 控制彈窗邏輯 -->
+ <!-- JavaScript 控制 5 分鐘冷卻邏輯 -->
   <script>
     lucide.createIcons();
 
     let currentTargetUrl = '#';
     const modal = document.getElementById('support-modal');
     const targetLinkBtn = document.getElementById('modal-target-link');
+    const COOLDOWN_TIME = 5 * 60 * 1000; // 5 分鐘 (毫秒)
 
-    // 開啟彈窗並暫存目標網址
     function openSupportModal(url) {
+      if (!url || url.trim() === '') {
+        alert('此項目正在施工中，敬請期待！');
+        return;
+      }
+
+      const lastShown = localStorage.getItem('taco_modal_last_shown');
+      const now = Date.now();
+
+      // 檢查是否在 5 分鐘內
+      if (lastShown && now - parseInt(lastShown, 10) < COOLDOWN_TIME) {
+        // 5 分鐘內：不跳彈窗，直接在新分頁開啟目標連結
+        window.open(url, '_blank', 'noopener,noreferrer');
+        return;
+      }
+
+      // 超過 5 分鐘或首次點擊：跳出彈窗並更新時間戳記
+      localStorage.setItem('taco_modal_last_shown', now.toString());
       currentTargetUrl = url;
       targetLinkBtn.href = url;
       modal.classList.remove('opacity-0', 'pointer-events-none');
     }
 
-    // 關閉彈窗
     function closeModal() {
       modal.classList.add('opacity-0', 'pointer-events-none');
     }
 
-    // 點擊彈窗外部背景自動關閉
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
         closeModal();
